@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.interview.transfermodule"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "30.0.16248370"
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:transfermodule/application/download/presentation/viewmodel/download_file_viewmodel.dart';
-import 'package:transfermodule/foundation/base/base_screen_widget.dart';
-import 'package:transfermodule/shared/components/app_colors.dart';
+import '../../../../foundation/base/base_screen_widget.dart';
+import '../../../../shared/components/app_colors.dart';
+import '../../domain/utility/download_file_view_model_builder.dart';
+import '../viewmodel/download_file_viewmodel.dart';
 
-/// Download File View implemented with BaseView and DownloadViewModel architecture.
+/// Download File View using BaseView and DownloadFileViewModel.
 class DownloadFileView extends StatelessWidget {
-  const DownloadFileView({super.key});
+  final String? fileUrl;
+  final String? fileName;
+
+  const DownloadFileView({
+    super.key,
+    this.fileUrl,
+    this.fileName,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BaseView<DownloadFileViewmodel>(
-      vmBuilder: (context) => DownloadFileViewmodel(),
+    return BaseView<DownloadFileViewModel>(
+      vmBuilder: (context) => DownloadFileViewModelBuilder(
+        fileUrl: fileUrl,
+        fileName: fileName,
+      ).build(),
       builder: (context, viewModel) {
         return Scaffold(
           backgroundColor: AppColors.appBGLightColor,
@@ -27,7 +38,7 @@ class DownloadFileView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.appPrimaryColor.withValues(alpha: 0.5), width: 2),
                     borderRadius: BorderRadius.circular(16),
@@ -38,15 +49,24 @@ class DownloadFileView extends StatelessWidget {
                       const Icon(Icons.cloud_download_outlined, size: 64, color: AppColors.appPrimaryColor),
                       const SizedBox(height: 16),
                       const Text(
-                        'Enter File ID or Reference to Download',
+                        'Download File from Server',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       TextField(
-                        controller: viewModel.fileIdController,
+                        controller: viewModel.fileUrlController,
                         decoration: InputDecoration(
-                          labelText: 'File Reference ID',
+                          labelText: 'File URL',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          prefixIcon: const Icon(Icons.link),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: viewModel.fileNameController,
+                        decoration: InputDecoration(
+                          labelText: 'Save File Name',
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                           prefixIcon: const Icon(Icons.insert_drive_file),
                         ),
@@ -66,7 +86,7 @@ class DownloadFileView extends StatelessWidget {
                   const SizedBox(height: 24),
                 ],
                 ElevatedButton(
-                  onPressed: viewModel.isDownloading ? null : () => viewModel.simulateDownload(context),
+                  onPressed: viewModel.isDownloading ? null : () => viewModel.startDownload(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.appPrimaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 16),

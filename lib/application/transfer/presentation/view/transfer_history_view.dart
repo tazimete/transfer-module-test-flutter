@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:transfermodule/application/download/presentation/view/download_file_view.dart';
 import 'package:transfermodule/shared/components/app_colors.dart';
 import '../viewmodel/dashboard_viewmodel.dart';
 
@@ -139,6 +140,17 @@ class TransferHistoryView extends StatelessWidget {
                 style: const TextStyle(color: AppColors.appSecondaryColor, fontSize: 13),
               ),
               trailing: const Icon(Icons.chevron_right, color: AppColors.appSecondaryColor),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DownloadFileView(
+                      fileUrl: file.url ?? 'http://15.232.228.139/api/download/${file.id}',
+                      fileName: file.name,
+                    ),
+                  ),
+                );
+              },
             ),
           );
         },

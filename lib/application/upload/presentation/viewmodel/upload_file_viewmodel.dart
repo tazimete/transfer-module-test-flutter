@@ -1,41 +1,101 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:transfermodule/foundation/base/base_viewmodel.dart';
+import 'package:file_picker/file_picker.dart';
+import '../../../../core/client/preference/abstract_preference_manager.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../domain/usecase/upload_file_usecase.dart';
+import '../../../../foundation/base/base_viewmodel.dart';
 
-class UploadFileViewmodel extends BaseViewModel {
-  final TextEditingController fileIdController = TextEditingController(text: 'TRX-1001-RECEIPT');
+class UploadFileViewModel extends BaseViewModel {
+  final UploadFileUseCase _uploadFileUseCase;
+  final AbstractPreferenceManager _preferenceManager;
+  final NotificationService _notificationService;
+
+  File? _selectedFile;
+  String? _selectedFileName;
   double _progress = 0.0;
-  bool _isDownloading = false;
+  bool _isUploading = false;
 
+  File? get selectedFile => _selectedFile;
+  String? get selectedFileName => _selectedFileName;
   double get progress => _progress;
-  bool get isDownloading => _isDownloading;
+  bool get isUploading => _isUploading;
+
+  UploadFileViewModel({
+    required UploadFileUseCase uploadFileUseCase,
+    required AbstractPreferenceManager preferenceManager,
+    required NotificationService notificationService,
+  })  : _uploadFileUseCase = uploadFileUseCase,
+        _preferenceManager = preferenceManager,
+        _notificationService = notificationService;
 
   @override
   Future<void> init() async {}
 
-  Future<void> simulateDownload(BuildContext context) async {
-    _isDownloading = true;
-    _progress = 0.0;
-    notifyListeners();
-
-    for (int i = 1; i <= 10; i++) {
-      await Future.delayed(const Duration(milliseconds: 150));
-      _progress = i / 10.0;
-      notifyListeners();
-    }
-
-    _isDownloading = false;
-    notifyListeners();
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('File downloaded successfully to Downloads!')),
+  Future<void> pickFile() async {
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
       );
+
+      if (result != null && result.files.single.path != null) {
+        _selectedFile = File(result.files.single.path!);
+        _selectedFileName = result.files.single.name;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error picking file: $e');
     }
   }
 
-  @override
-  void dispose() {
-    fileIdController.dispose();
-    super.dispose();
+  Future<void> uploadFile(BuildContext context) async {
+    if (_selectedFile == null) return;
+
+    _isUploading = true;
+    _progress = 0.0;
+    notifyListeners();
+
+    try {
+      final token = await _preferenceManager.authToken;
+      debugPrint('Uploading with stored token: ${token != null ? 'Present' : 'Absent'}');
+
+      final params = UploadFileParams(
+        file: _selectedFile!,
+        fieldName: 'file',
+        onSendProgress: (int sent, int total) {
+          if (total > 0) {
+            _progress = sent / total;
+            notifyListeners();
+          }
+        },
+      );
+
+      final result = await _uploadFileUseCase.invoke(params);
+
+      _isUploading = false;
+      _progress = 1.0;
+      notifyListeners();
+
+      await _notificationService.showUploadCompleteNotification(
+        title: 'Upload Successful!',
+        body: 'File "${_selectedFileName ?? 'Document'}" was uploaded successfully.',
+      );
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.message)),
+        );
+      }
+    } catch (e) {
+      _isUploading = false;
+      notifyListeners();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
+    }
   }
 }

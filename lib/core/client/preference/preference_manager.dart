@@ -1,34 +1,14 @@
-import '../network/auth_session.dart';
-import 'preference_client.dart';
+import 'abstract_preference_client.dart';
+import 'abstract_preference_manager.dart';
 import 'preference_keys.dart';
 
-/// Abstract domain preference manager contract extending [AuthSession].
-/// Provides thread-safe, asynchronous session state and preference operations.
-abstract class IPreferenceManager implements AuthSession {
-  /// Atomically saves authentication token and login status.
-  Future<void> saveAuthSession({
-    required String token,
-    bool isLoggedIn = true,
-  });
-
-  /// Explicitly updates the user logged-in boolean flag.
-  Future<void> setLoggedIn(bool value);
-
-  /// Explicitly updates or removes the authentication token.
-  Future<void> setAuthToken(String? token);
-
-  /// Clears stored authentication session details.
-  Future<void> clearAuthSession();
-}
-
-/// Production implementation of [IPreferenceManager].
-/// Enforces Dependency Inversion by relying on abstract [IPreferenceClient].
-class PreferenceManager implements IPreferenceManager {
-  final IPreferenceClient _preferenceClient;
+/// Implementation of [AbstractPreferenceManager].
+class PreferenceManager implements AbstractPreferenceManager {
+  final AbstractPreferenceClient _preferenceClient;
   final void Function()? _onUnauthenticatedCallback;
 
   PreferenceManager({
-    required IPreferenceClient preferenceClient,
+    required AbstractPreferenceClient preferenceClient,
     void Function()? onUnauthenticatedCallback,
   })  : _preferenceClient = preferenceClient,
         _onUnauthenticatedCallback = onUnauthenticatedCallback;

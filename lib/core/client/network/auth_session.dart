@@ -1,17 +1,19 @@
-/// Contract for managing authentication state and access tokens across network requests.
-abstract class AuthSession {
-  /// Returns `true` if the user is currently logged in.
+import 'abstract_auth_session.dart';
+
+/// Legacy auth session interface extending [AbstractAuthSession] for backward compatibility.
+abstract class AuthSession implements AbstractAuthSession {
+  @override
   Future<bool> get isLoggedIn;
 
-  /// Returns the current access token (e.g., JWT / Bearer token).
+  @override
   Future<String?> get authToken;
 
-  /// Callback triggered when an unauthenticated response (401) is encountered.
+  @override
   void onUnauthenticated();
 }
 
-/// Simple in-memory implementation of [AuthSession], ideal for testing or state management integration.
-class InMemoryAuthSession implements AuthSession {
+/// In-memory implementation of [AbstractAuthSession] suitable for testing.
+class InMemoryAuthSession implements AbstractAuthSession {
   bool _isLoggedIn;
   String? _token;
   final void Function()? _onUnauthenticatedCallback;
@@ -30,7 +32,6 @@ class InMemoryAuthSession implements AuthSession {
   @override
   Future<String?> get authToken async => _token;
 
-  /// Update the login state and token.
   void setSession({required bool loggedIn, String? token}) {
     _isLoggedIn = loggedIn;
     _token = token;

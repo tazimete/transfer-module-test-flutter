@@ -1,15 +1,16 @@
 import 'dart:developer';
 import '../network/network.dart';
-import 'preference_client.dart';
+import 'abstract_preference_client.dart';
+import 'abstract_preference_manager.dart';
 import 'preference_manager.dart';
 import 'shared_preferences_client.dart';
 
 /// Example demonstrating Dependency Injection, storing/retrieving authToken & login status,
-/// and wiring [IPreferenceManager] directly into [DioNetworkClient].
+/// and wiring [AbstractPreferenceManager] directly into [DioNetworkClient].
 class PreferenceClientExample {
-  final IPreferenceManager preferenceManager;
+  final AbstractPreferenceManager preferenceManager;
 
-  PreferenceClientExample({IPreferenceManager? manager})
+  PreferenceClientExample({AbstractPreferenceManager? manager})
       : preferenceManager = manager ??
             PreferenceManager(
               preferenceClient: SharedPreferencesClient(),
@@ -51,8 +52,8 @@ class PreferenceClientExample {
 
 /// Executable scenario showcasing initialization and integration with Network Client.
 Future<void> runPreferenceManagerExample() async {
-  final IPreferenceClient preferenceClient = SharedPreferencesClient();
-  final IPreferenceManager prefManager = PreferenceManager(
+  final AbstractPreferenceClient preferenceClient = SharedPreferencesClient();
+  final AbstractPreferenceManager prefManager = PreferenceManager(
     preferenceClient: preferenceClient,
     onUnauthenticatedCallback: () {
       log('Unauthenticated event received -> Navigating to Login.');
@@ -65,12 +66,12 @@ Future<void> runPreferenceManagerExample() async {
   await example.loginUser(token: 'sample_jwt_bearer_token_998877');
 
   // Inject PreferenceManager directly into DioNetworkClient
-  final INetworkClient networkClient = DioNetworkClient(
-    authSession: prefManager, // IPreferenceManager implements AuthSession interface!
+  final AbstractNetworkClient networkClient = DioNetworkClient(
+    authSession: prefManager, // AbstractPreferenceManager implements AbstractAuthSession interface!
     enableLogging: true,
   );
 
-  log('Network Client successfully wired with PreferenceManager as AuthSession!');
+  log('Network Client successfully wired with PreferenceManager as AbstractAuthSession!');
   log('Network Client Base URL: ${networkClient.baseUrl}');
 
   // Perform logout

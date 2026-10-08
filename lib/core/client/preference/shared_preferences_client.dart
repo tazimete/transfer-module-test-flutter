@@ -1,16 +1,14 @@
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'preference_client.dart';
+import 'abstract_preference_client.dart';
 
-/// Production implementation of [IPreferenceClient] using [SharedPreferences].
-/// Fully asynchronous, thread-safe, and dependency-injectable.
-class SharedPreferencesClient implements IPreferenceClient {
+/// Implementation of [AbstractPreferenceClient] using [SharedPreferences].
+class SharedPreferencesClient implements AbstractPreferenceClient {
   final FutureOr<SharedPreferences> _prefsInstance;
 
   SharedPreferencesClient({FutureOr<SharedPreferences>? prefs})
       : _prefsInstance = prefs ?? SharedPreferences.getInstance();
 
-  /// Resolves the underlying [SharedPreferences] instance safely.
   Future<SharedPreferences> get _prefs async {
     final instance = _prefsInstance;
     if (instance is SharedPreferences) {

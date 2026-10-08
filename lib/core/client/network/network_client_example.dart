@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'abstract_auth_session.dart';
+import 'abstract_network_client.dart';
 import 'auth_session.dart';
 import 'dio_network_client.dart';
 import 'network_client.dart';
@@ -9,9 +11,9 @@ import 'network_exception.dart';
 /// Complete, self-contained example demonstrating GET requests and multi-part file uploads
 /// with upload progress tracking, custom interceptors, and error handling.
 class NetworkClientExample {
-  final INetworkClient networkClient;
+  final AbstractNetworkClient networkClient;
 
-  NetworkClientExample({INetworkClient? client, AuthSession? authSession})
+  NetworkClientExample({AbstractNetworkClient? client, AbstractAuthSession? authSession})
       : networkClient = client ??
             DioNetworkClient(
               authSession: authSession ??
@@ -104,7 +106,6 @@ Future<void> runNetworkClientExample() async {
   await example.fetchTransferHistory(page: 1, limit: 10, status: 'completed');
 
   log('--- Running Multi-part Upload Request Example ---');
-  // Create a temporary sample file for demonstration
   final tempDir = Directory.systemTemp;
   final tempFile = File('${tempDir.path}/sample_document.pdf');
   await tempFile.writeAsString('Sample PDF content for file upload test');
@@ -114,9 +115,7 @@ Future<void> runNetworkClientExample() async {
     fileFieldName: 'document',
     title: 'Transfer Proof Document',
     description: 'Receipt copy for transfer #10092',
-    onProgress: (percentage) {
-      // Progress update listener callback
-    },
+    onProgress: (percentage) {},
   );
 
   if (await tempFile.exists()) {

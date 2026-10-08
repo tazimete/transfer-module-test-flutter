@@ -13,7 +13,8 @@ void main() {
   testWidgets('Dashboard smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
 
     // Verify that Dashboard loads with Transfer History title
     expect(find.text('Transfer History'), findsWidgets);

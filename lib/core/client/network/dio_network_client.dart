@@ -1,21 +1,20 @@
 import 'package:dio/dio.dart';
-import 'auth_session.dart';
-
+import 'abstract_auth_session.dart';
+import 'abstract_network_client.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/logging_interceptor.dart';
 import 'interceptors/weak_network_interceptor.dart';
-import 'network_client.dart';
 import 'network_config.dart';
 import 'network_exception.dart';
 
-/// Modular, production-ready implementation of [INetworkClient] powered by [Dio].
-class DioNetworkClient implements INetworkClient {
+/// Implementation of [AbstractNetworkClient] powered by [Dio].
+class DioNetworkClient implements AbstractNetworkClient {
   final Dio _dio;
   final String _baseUrl;
 
   DioNetworkClient({
     Dio? dio,
-    AuthSession? authSession,
+    AbstractAuthSession? authSession,
     String? baseUrl,
     List<Interceptor>? additionalInterceptors,
     bool enableLogging = true,
@@ -25,7 +24,7 @@ class DioNetworkClient implements INetworkClient {
   }
 
   void _configureDio(
-    AuthSession? authSession,
+    AbstractAuthSession? authSession,
     List<Interceptor>? additionalInterceptors,
     bool enableLogging,
   ) {
@@ -37,7 +36,6 @@ class DioNetworkClient implements INetworkClient {
       headers: Map.from(NetworkConfig.defaultHeaders),
     );
 
-    // Attach interceptors in logical order
     _dio.interceptors.add(WeakNetworkInterceptor());
 
     if (authSession != null) {

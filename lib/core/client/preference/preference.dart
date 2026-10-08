@@ -1,3 +1,5 @@
+export 'abstract_preference_client.dart';
+export 'abstract_preference_manager.dart';
 export 'preference_client.dart';
 export 'preference_example.dart';
 export 'preference_keys.dart';

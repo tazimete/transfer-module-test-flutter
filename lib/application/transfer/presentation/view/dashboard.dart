@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:transfermodule/application/transfer/presentation/view/download_file_view.dart';
+import 'package:transfermodule/application/download/presentation/view/download_file_view.dart';
 import 'package:transfermodule/application/transfer/presentation/view/transfer_history_view.dart';
 import 'package:transfermodule/application/transfer/presentation/view/upload_file_view.dart';
 import 'package:transfermodule/application/transfer/presentation/viewmodel/dashboard_viewmodel.dart';

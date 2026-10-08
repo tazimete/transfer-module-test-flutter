@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import '../../../../core/services/notification_service.dart';
-import '../../domain/usecase/download_file_usecase.dart';
-import '../../domain/usecase/open_file_usecase.dart';
+import '../../../../core/client/preference/abstract_preference_manager.dart';
+import '../../../../core/services/download_service.dart';
 import '../../../../foundation/base/base_viewmodel.dart';
 
 class DownloadFileViewModel extends BaseViewModel {
-  final DownloadFileUseCase _downloadFileUseCase;
-  final OpenFileUseCase _openFileUseCase;
-  final NotificationService _notificationService;
+  final DownloadService _downloadService;
+  final AbstractPreferenceManager _preferenceManager;
 
   final TextEditingController fileUrlController;
   final TextEditingController fileNameController;
@@ -20,14 +17,12 @@ class DownloadFileViewModel extends BaseViewModel {
   bool get isDownloading => _isDownloading;
 
   DownloadFileViewModel({
-    required DownloadFileUseCase downloadFileUseCase,
-    required OpenFileUseCase openFileUseCase,
-    required NotificationService notificationService,
+    required DownloadService downloadService,
+    required AbstractPreferenceManager preferenceManager,
     String? initialFileUrl,
     String? initialFileName,
-  })  : _downloadFileUseCase = downloadFileUseCase,
-        _openFileUseCase = openFileUseCase,
-        _notificationService = notificationService,
+  })  : _downloadService = downloadService,
+        _preferenceManager = preferenceManager,
         fileUrlController = TextEditingController(text: initialFileUrl ?? 'http://15.232.228.139/api/download/sample.pdf'),
         fileNameController = TextEditingController(text: initialFileName ?? 'downloaded_file.pdf');
 
@@ -49,87 +44,42 @@ class DownloadFileViewModel extends BaseViewModel {
     _progress = 0.0;
     notifyListeners();
 
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final savePath = '${dir.path}/$name';
+    final token = await _preferenceManager.authToken;
 
-      // Show initial notification
-      await _notificationService.showDownloadProgressNotification(
-        id: 2001,
-        title: 'Downloading $name',
-        body: 'Progress: 0%',
-        progress: 0,
-        isCompleted: false,
-      );
+    // Run download in DownloadService (decoupled from screen lifecycle so pressing back doesn't cancel it)
+    _downloadService.startBackgroundDownload(
+      fileUrl: url,
+      fileName: name,
+      token: token,
+      onProgress: (progressVal) {
+        if (isDisposed) return;
+        _progress = progressVal;
+        notifyListeners();
+      },
+      onComplete: (savePath) {
+        if (isDisposed) return;
+        _isDownloading = false;
+        _progress = 1.0;
+        notifyListeners();
 
-      int lastReportedPercent = -1;
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Downloaded and opened successfully: $name')),
+          );
+        }
+      },
+      onError: (error) {
+        if (isDisposed) return;
+        _isDownloading = false;
+        notifyListeners();
 
-      final params = DownloadFileParams(
-        fileUrl: url,
-        savePath: savePath,
-        onReceiveProgress: (int received, int total) {
-          if (total > 0) {
-            _progress = received / total;
-            notifyListeners();
-
-            final int percent = (_progress * 100).toInt();
-            if (percent != lastReportedPercent && (percent % 10 == 0 || percent == 100)) {
-              lastReportedPercent = percent;
-              _notificationService.showDownloadProgressNotification(
-                id: 2001,
-                title: 'Downloading $name',
-                body: 'Progress: $percent%',
-                progress: percent,
-                isCompleted: false,
-              );
-            }
-          }
-        },
-      );
-
-      // Executes download via Clean Architecture UseCase (automatically authenticated with Bearer token)
-      await _downloadFileUseCase.invoke(params);
-
-      _isDownloading = false;
-      _progress = 1.0;
-      notifyListeners();
-
-      // Show completion notification
-      await _notificationService.showDownloadProgressNotification(
-        id: 2001,
-        title: 'Download Complete',
-        body: 'Tap to open $name',
-        progress: 100,
-        isCompleted: true,
-        filePath: savePath,
-      );
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Downloaded successfully to $savePath. Opening file...')),
-        );
-      }
-
-      // Open file immediately
-      await _openFileUseCase.invoke(OpenFileParams(filePath: savePath));
-    } catch (e) {
-      _isDownloading = false;
-      notifyListeners();
-
-      await _notificationService.showDownloadProgressNotification(
-        id: 2001,
-        title: 'Download Failed',
-        body: 'Could not download file: $e',
-        progress: 0,
-        isCompleted: false,
-      );
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Download failed: $e')),
-        );
-      }
-    }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Download failed: $error')),
+          );
+        }
+      },
+    );
   }
 
   @override

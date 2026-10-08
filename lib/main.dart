@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'application/transfer/presentation/view/dashboard.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -30,7 +32,8 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      // home: const MyHomePage(title: 'Flu Tra Demo Home Pa Tra,
+      home: Dashboard(),
     );
   }
 }

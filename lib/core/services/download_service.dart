@@ -39,12 +39,17 @@ class DownloadService {
       },
     );
 
-    // Create Android notification channel for progress
+    // Request Android 13+ POST_NOTIFICATIONS runtime permission
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
+    // Create Android notification channel with max importance for status bar visibility
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'download_channel_id',
       'File Downloads',
       description: 'Notifications for file download progress',
-      importance: Importance.low,
+      importance: Importance.max,
     );
 
     await _notificationsPlugin
@@ -154,8 +159,8 @@ class DownloadService {
         'download_channel_id',
         'File Downloads',
         channelDescription: 'Notifications for file download progress',
-        importance: Importance.low,
-        priority: Priority.low,
+        importance: Importance.max,
+        priority: Priority.high,
         ongoing: true,
         autoCancel: false,
         showProgress: true,
@@ -190,7 +195,7 @@ class DownloadService {
         'download_channel_id',
         'File Downloads',
         channelDescription: 'Notifications for file download progress',
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high,
         ongoing: false,
         autoCancel: true,
@@ -223,7 +228,7 @@ class DownloadService {
         'download_channel_id',
         'File Downloads',
         channelDescription: 'Notifications for file download progress',
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high,
         ongoing: false,
         autoCancel: true,

@@ -12,9 +12,13 @@ import 'abstract_view_model_builder.dart';
 class DashboardViewModelBuilder implements AbstractViewModelBuilder<DashboardViewmodel> {
   @override
   DashboardViewmodel build() {
-    final networkClient = DioNetworkClient(enableLogging: true);
     final preferenceClient = SharedPreferencesClient();
     final preferenceManager = PreferenceManager(preferenceClient: preferenceClient);
+
+    final networkClient = DioNetworkClient(
+      authSession: preferenceManager,
+      enableLogging: true,
+    );
 
     final authRemoteDataSource = AuthRemoteDataSource(networkClient: networkClient);
     final authRepository = AuthRepository(remoteDataSource: authRemoteDataSource);

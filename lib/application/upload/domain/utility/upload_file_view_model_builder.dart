@@ -12,9 +12,14 @@ import 'abstract_view_model_builder.dart';
 class UploadFileViewModelBuilder implements AbstractViewModelBuilder<UploadFileViewModel> {
   @override
   UploadFileViewModel build() {
-    final networkClient = DioNetworkClient(enableLogging: true);
     final preferenceClient = SharedPreferencesClient();
     final preferenceManager = PreferenceManager(preferenceClient: preferenceClient);
+
+    // Pass preferenceManager as authSession so AuthInterceptor automatically attaches Bearer token to requests
+    final networkClient = DioNetworkClient(
+      authSession: preferenceManager,
+      enableLogging: true,
+    );
 
     final uploadRemoteDataSource = UploadRemoteDataSource(networkClient: networkClient);
     final uploadRepository = UploadRepository(remoteDataSource: uploadRemoteDataSource);

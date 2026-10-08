@@ -128,7 +128,7 @@ class Dashboard extends StatelessWidget {
           ),
           selected: isSelected,
           selectedTileColor: AppColors.appPrimaryColor.withValues(alpha: 0.08),
-          trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.appSecondaryColor),
+          trailing: const Icon(Icons.download, size: 18, color: AppColors.appPrimaryColor),
           onTap: () {
             Navigator.pop(context);
             onTap();

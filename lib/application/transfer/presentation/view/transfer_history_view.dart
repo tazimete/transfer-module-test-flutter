@@ -139,7 +139,7 @@ class TransferHistoryView extends StatelessWidget {
                 'ID: ${file.id} ${file.uploadedAt != null ? '• ${file.uploadedAt}' : ''}',
                 style: const TextStyle(color: AppColors.appSecondaryColor, fontSize: 13),
               ),
-              trailing: const Icon(Icons.chevron_right, color: AppColors.appSecondaryColor),
+              trailing: const Icon(Icons.download, color: AppColors.appPrimaryColor),
               onTap: () {
                 Navigator.push(
                   context,

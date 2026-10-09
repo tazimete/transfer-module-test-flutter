@@ -8,8 +8,8 @@ import 'package:transfermodule/application/transfer/presentation/viewmodel/dashb
 import 'package:transfermodule/foundation/base/base_screen_widget.dart';
 import 'package:transfermodule/shared/components/app_colors.dart';
 
-class Dashboard extends StatelessWidget {
-  const Dashboard({super.key});
+class DashboardView extends StatelessWidget {
+  const DashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {

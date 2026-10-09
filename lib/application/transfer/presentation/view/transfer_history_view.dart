@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:transfermodule/application/download/presentation/view/download_file_view.dart';
+import 'package:transfermodule/foundation/base/base_screen_widget.dart';
 import 'package:transfermodule/shared/components/app_colors.dart';
-import '../viewmodel/dashboard_viewmodel.dart';
+import '../viewmodel/transfer_history_viewmodel.dart';
+import '../../domain/utility/transfer_history_view_model_builder.dart';
 
-/// Transfer History View showing uploaded files from the server with error and empty states.
+/// Transfer History View using BaseView and TransferHistoryViewModel with DI/mocking facility.
 class TransferHistoryView extends StatelessWidget {
-  const TransferHistoryView({super.key});
+  final TransferHistoryViewModel? viewModel;
+
+  const TransferHistoryView({super.key, this.viewModel});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DashboardViewmodel>(
-      builder: (context, viewModel, child) {
+    return BaseView<TransferHistoryViewModel>(
+      vmBuilder: (context) => viewModel ?? TransferHistoryViewModelBuilder().build(),
+      builder: (context, vm) {
         return Scaffold(
           backgroundColor: AppColors.appBGLightColor,
           appBar: AppBar(
@@ -22,18 +26,18 @@ class TransferHistoryView extends StatelessWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh),
-                onPressed: () => viewModel.fetchUploadedFiles(),
+                onPressed: () => vm.fetchUploadedFiles(),
                 tooltip: 'Refresh Files',
               ),
             ],
           ),
-          body: _buildBody(context, viewModel),
+          body: _buildBody(context, vm),
         );
       },
     );
   }
 
-  Widget _buildBody(BuildContext context, DashboardViewmodel viewModel) {
+  Widget _buildBody(BuildContext context, TransferHistoryViewModel viewModel) {
     if (viewModel.isLoadingFiles) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.appPrimaryColor),

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:transfermodule/application/download/presentation/view/download_file_view.dart';
+import 'package:transfermodule/application/download/domain/utility/download_file_view_model_builder.dart';
 import 'package:transfermodule/application/transfer/presentation/view/transfer_history_view.dart';
+import 'package:transfermodule/application/transfer/domain/utility/transfer_history_view_model_builder.dart';
 import 'package:transfermodule/application/upload/domain/utility/dashboard_view_model_builder.dart';
+import 'package:transfermodule/application/upload/domain/utility/upload_file_view_model_builder.dart';
 import 'package:transfermodule/application/upload/presentation/view/upload_file_view.dart';
 import 'package:transfermodule/application/transfer/presentation/viewmodel/dashboard_viewmodel.dart';
 import 'package:transfermodule/foundation/base/base_screen_widget.dart';
@@ -17,9 +20,9 @@ class DashboardView extends StatelessWidget {
       vmBuilder: (context) => DashboardViewModelBuilder().build(),
       builder: (context, viewModel) {
         final views = [
-          const TransferHistoryView(),
-          const UploadFileView(),
-          const DownloadFileView(),
+          TransferHistoryView(viewModel: TransferHistoryViewModelBuilder().build()),
+          UploadFileView(viewModel: UploadFileViewModelBuilder().build()),
+          DownloadFileView(viewModel: DownloadFileViewModelBuilder().build()),
         ];
 
         final titles = [

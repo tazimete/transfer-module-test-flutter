@@ -4,15 +4,17 @@ import '../../../../shared/components/app_colors.dart';
 import '../../domain/utility/upload_file_view_model_builder.dart';
 import '../viewmodel/upload_file_viewmodel.dart';
 
-/// Upload File View using BaseView and UploadFileViewModel with Clean Architecture & Builders.
+/// Upload File View using BaseView and UploadFileViewModel with DI/mocking facility.
 class UploadFileView extends StatelessWidget {
-  const UploadFileView({super.key});
+  final UploadFileViewModel? viewModel;
+
+  const UploadFileView({super.key, this.viewModel});
 
   @override
   Widget build(BuildContext context) {
     return BaseView<UploadFileViewModel>(
-      vmBuilder: (context) => UploadFileViewModelBuilder().build(),
-      builder: (context, viewModel) {
+      vmBuilder: (context) => viewModel ?? UploadFileViewModelBuilder().build(),
+      builder: (context, vm) {
         return Scaffold(
           backgroundColor: AppColors.appBGLightColor,
           appBar: AppBar(
@@ -39,7 +41,7 @@ class UploadFileView extends StatelessWidget {
                       const Icon(Icons.cloud_upload_outlined, size: 64, color: AppColors.appPrimaryColor),
                       const SizedBox(height: 16),
                       Text(
-                        viewModel.selectedFileName ?? 'Select a large file (e.g. video, image, .csv)',
+                        vm.selectedFileName ?? 'Select a large file (e.g. video, image, .csv)',
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                         textAlign: TextAlign.center,
                       ),
@@ -50,7 +52,7 @@ class UploadFileView extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
-                        onPressed: viewModel.isUploading ? null : () => viewModel.pickFile(),
+                        onPressed: vm.isUploading ? null : () => vm.pickFile(),
                         icon: const Icon(Icons.folder_open),
                         label: const Text('Browse Files'),
                         style: ElevatedButton.styleFrom(
@@ -64,20 +66,20 @@ class UploadFileView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                if (viewModel.isUploading) ...[
-                  LinearProgressIndicator(value: viewModel.progress, color: AppColors.appPrimaryColor),
+                if (vm.isUploading) ...[
+                  LinearProgressIndicator(value: vm.progress, color: AppColors.appPrimaryColor),
                   const SizedBox(height: 12),
                   Text(
-                    'Uploading... ${(viewModel.progress * 100).toStringAsFixed(0)}%',
+                    'Uploading... ${(vm.progress * 100).toStringAsFixed(0)}%',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.appSecondaryColor),
                   ),
                   const SizedBox(height: 24),
                 ],
                 ElevatedButton(
-                  onPressed: (viewModel.selectedFile == null || viewModel.isUploading)
+                  onPressed: (vm.selectedFile == null || vm.isUploading)
                       ? null
-                      : () => viewModel.uploadFile(context),
+                      : () => vm.uploadFile(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.appPrimaryColor,
                     disabledBackgroundColor: AppColors.appDisableColor,
@@ -85,7 +87,7 @@ class UploadFileView extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
-                    viewModel.isUploading ? 'Uploading...' : 'Start Upload',
+                    vm.isUploading ? 'Uploading...' : 'Start Upload',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),

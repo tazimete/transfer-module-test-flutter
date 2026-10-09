@@ -4,25 +4,27 @@ import '../../../../shared/components/app_colors.dart';
 import '../../domain/utility/download_file_view_model_builder.dart';
 import '../viewmodel/download_file_viewmodel.dart';
 
-/// Download File View using BaseView and DownloadFileViewModel.
+/// Download File View using BaseView and DownloadFileViewModel with DI/mocking facility.
 class DownloadFileView extends StatelessWidget {
   final String? fileUrl;
   final String? fileName;
+  final DownloadFileViewModel? viewModel;
 
   const DownloadFileView({
     super.key,
     this.fileUrl,
     this.fileName,
+    this.viewModel,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseView<DownloadFileViewModel>(
-      vmBuilder: (context) => DownloadFileViewModelBuilder(
+      vmBuilder: (context) => viewModel ?? DownloadFileViewModelBuilder(
         fileUrl: fileUrl,
         fileName: fileName,
       ).build(),
-      builder: (context, viewModel) {
+      builder: (context, vm) {
         return Scaffold(
           backgroundColor: AppColors.appBGLightColor,
           appBar: AppBar(
@@ -55,7 +57,7 @@ class DownloadFileView extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       TextField(
-                        controller: viewModel.fileUrlController,
+                        controller: vm.fileUrlController,
                         decoration: InputDecoration(
                           labelText: 'File URL',
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -64,7 +66,7 @@ class DownloadFileView extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       TextField(
-                        controller: viewModel.fileNameController,
+                        controller: vm.fileNameController,
                         decoration: InputDecoration(
                           labelText: 'Save File Name',
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -75,25 +77,25 @@ class DownloadFileView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                if (viewModel.isDownloading) ...[
-                  LinearProgressIndicator(value: viewModel.progress, color: AppColors.appPrimaryColor),
+                if (vm.isDownloading) ...[
+                  LinearProgressIndicator(value: vm.progress, color: AppColors.appPrimaryColor),
                   const SizedBox(height: 12),
                   Text(
-                    'Downloading... ${(viewModel.progress * 100).toStringAsFixed(0)}%',
+                    'Downloading... ${(vm.progress * 100).toStringAsFixed(0)}%',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.appSecondaryColor),
                   ),
                   const SizedBox(height: 24),
                 ],
                 ElevatedButton(
-                  onPressed: viewModel.isDownloading ? null : () => viewModel.startDownload(context),
+                  onPressed: vm.isDownloading ? null : () => vm.startDownload(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.appPrimaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
-                    viewModel.isDownloading ? 'Downloading...' : 'Start Download',
+                    vm.isDownloading ? 'Downloading...' : 'Start Download',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
